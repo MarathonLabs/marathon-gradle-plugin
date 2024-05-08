@@ -33,8 +33,7 @@ For more information see the [documentation][docs]
 |                                          | Missing features, e.g. multi-module testing                                               |
 
 
-### Configuration
-
+### Setup
 Marathon gradle plugin is published to [plugins.gradle.org][plugins-gradle].
 To apply the plugin:
 
@@ -53,8 +52,85 @@ plugins {
 }
 ```
 
-All the test tasks will start with **marathon** prefix, for example **marathonDebugAndroidTest**.
+### Configuration
+Configuration for Gradle Plugin can only be done via Gradle, i.e. you can't use Marathonfile as configuration when running tests using Gradle Plugin.
 
+Here is an example of gradle config using Kotlin DSL (for more information about the parameters see the [documentation][docs]):
+```kotlin
+marathon {
+  name = "sample-app tests"
+  baseOutputDir = "./marathon"
+  outputConfiguration {
+    maxPath = 1024
+  }
+  analytics {
+    influx {
+      url = "http://influx.svc.cluster.local:8086"
+      user = "root"
+      password = "root"
+      dbName = "marathon"
+    }
+  }
+  poolingStrategy {
+    operatingSystem = true
+  }
+  shardingStrategy {
+    countSharding {
+      count = 5
+    }
+  }
+  sortingStrategy {
+    executionTime {
+      percentile = 90.0
+      executionTime = Instant.now().minus(3, ChronoUnit.DAYS)
+    }
+  }
+  batchingStrategy {
+    fixedSize {
+      size = 10
+    }
+  }
+  flakinessStrategy {
+    probabilityBased {
+      minSuccessRate = 0.8
+      maxCount = 3
+      timeLimit = Instant.now().minus(30, ChronoUnit.DAYS)
+    }
+  }
+  retryStrategy {
+    fixedQuota {
+      totalAllowedRetryQuota = 200
+      retryPerTestQuota = 3
+    }
+  }
+  filteringConfiguration {
+    allowlist {
+      add(SimpleClassnameFilterConfiguration(".*".toRegex()))
+    }
+    blocklist {
+      add(SimpleClassnameFilterConfiguration("$^".toRegex()))
+    }
+  }
+  includeSerialRegexes = emptyList()
+  excludeSerialRegexes = emptyList()
+  uncompletedTestRetryQuota = 100
+  ignoreFailures = false
+  isCodeCoverageEnabled = false
+  fallbackToScreenshots = false
+  testOutputTimeoutMillis = 30_000
+  debug = true
+  autoGrantPermission = true
+}
+```
+
+### Execute
+Executing your tests via gradle is done via calling generated marathon gradle task, for example marathonDebugAndroidTest.
+All the test tasks will start with **marathon** prefix, for example **marathonDebugAndroidTest**.
+These tasks will be created for all testing flavors including multi-dimension setup.
+
+```shell
+$ gradle :app:marathonDebugAndroidTest
+```
 
 ## Contributing
 
