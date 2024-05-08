@@ -10,7 +10,7 @@
 
 </div>
 
-Gradle plugin for [**Marathon**][marathon] test runner
+Gradle plugin wrapper for [**Marathon**][marathon] test runner
 
 ## TL;DR
 Marathon is a fast, platform-independent test runner focused on performance and stability.
@@ -23,7 +23,7 @@ For more information see the [documentation][docs]
 
 ### Overview
 
-## Tradeoffs using Gradle Plugin
+#### Tradeoffs using Gradle Plugin
 
 | Pros                                     | Cons                                                                                      |
 |------------------------------------------|-------------------------------------------------------------------------------------------|
