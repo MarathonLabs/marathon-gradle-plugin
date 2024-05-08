@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="docs/static/img/marathon-banner.svg" alt="Marathon Logo" />
+  <img src="assets/img/marathon-banner.svg" alt="Marathon Logo" />
 </h1>
 
 <div align="center">
@@ -10,10 +10,10 @@
 
 </div>
 
-**Marathon** is a project that helps execute tests in the shortest time possible. Specifically it helps with **stability** of test execution adjusting for flakiness in the environment and in the tests and also achieves best **performance** using high parallelization
+Gradle plugin for [**Marathon**][marathon] test runner
 
 ## TL;DR
-Marathon is a fast, platform-independent test runner focused on performance and stability. It offers easy to use platform implementations for Android and iOS as well as an API for use with custom hardware farms and more techstacks.
+Marathon is a fast, platform-independent test runner focused on performance and stability.
 
 Marathon implements multiple key concepts of test execution such as test **batching**, **device pools**, test **sharding**, test **sorting**, **preventive retries** as well as **post-factum retries**. By default, most of these are set to conservative defaults but custom configurations are encouraged for those who want to optimize performance and/or stability.
 
@@ -22,113 +22,39 @@ Marathon's primary focus is on **full control over the balance between stability
 For more information see the [documentation][docs]
 
 ### Overview
-#### Performance
-Marathon takes into account two key aspects of test execution:
-* The duration of the test
-* The probability of the test passing
 
-Test run can only finish as quickly as possible if we plan the execution of tests with regard to the expected duration of the test. On the other hand, we need to address the flakiness of the environment and of the test itself. One key indicator of flakiness is the *probability* of the test passing.
+## Tradeoffs using Gradle Plugin
 
-Marathon takes a number of steps to ensure that each test run is as balanced as possible:
-* The flakiness strategy queues up preventive retries for tests which are expected to fail during the test run according to the current real-time statistical data
-* The sorting strategy forces long tests to be executed first so that if an unexpected retry attempt occurs it doesn't affect the test run significantly (e.g. at the end of execution)
-* If all else fail we revert back to post-factum retries, but we try to limit their impact on the run with retry quotas
+| Pros                                     | Cons                                                                                      |
+|------------------------------------------|-------------------------------------------------------------------------------------------|
+| Configuration using Gradle syntax        | Requires project sync before testing starts                                               |
+| No installation of marathon CLI required | Less flexibility in choosing AGP+Gradle versions. CLI is independent of your Gradle setup |
+|                                          | Harder to manage when you have more than 1 test run configuration                         |
+|                                          | Missing features, e.g. multi-module testing                                               |
+
 
 ### Configuration
 
-Create a basic **Marathonfile** in the root of your project with the following content:
+Marathon gradle plugin is published to [plugins.gradle.org][plugins-gradle].
+To apply the plugin:
 
-Android:
-```yaml
-name: "My application"
-outputDir: "build/reports/marathon"
-vendorConfiguration:
-  type: "Android"
-  applicationApk: "dist/app-debug.apk"
-  testApplicationApk: "dist/app-debug-androidTest.apk"
+#### Gradle KTS
+
+```kotlin
+plugins {
+  id("com.malinskiy.marathon") version "X.X.X"
+}
 ```
 
-iOS:
-```yaml
-name: "My application"
-outputDir: "derived-data/Marathon"
-vendorConfiguration:
-  type: "iOS"
-  bundle:
-    application: "sample.app"
-    testApplication: "sampleUITests.xctest"
-    testType: xcuitest
+#### Gradle
+```groovy
+plugins {
+  id 'com.malinskiy.marathon' version 'X.X.X'
+}
 ```
 
-Vendor section describes platform specific details.
+All the test tasks will start with **marathon** prefix, for example **marathonDebugAndroidTest**.
 
-Since iOS doesn't have any way to discover remote execution devices you have to provide your simulators using the **Marathondevices** file:
-
-```yaml
-workers:
-  - transport:
-      type: local
-    devices:
-      - type: simulator
-        udid: "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
-      - type: simulatorProfile
-        deviceType: com.apple.CoreSimulator.SimDeviceType.iPhone-13-mini
-```
-
-This **Marathondevices** file specifies a list of macOS instances and simulators for use. Marathon can use pre-provisioned simulators, but it can also provision new ones if needed.
-
-Example above uses the local instance where marathon is executed, but you can connect many more instance via SSH.
-
-> ℹ️ The instance where you run marathon is not limited to macOS: if you're using remote macOS instances then
-you can easily start your marathon run from Linux for example.
-
-You can find more information on providing devices in the [workers documentation][docs-workers]
-
-The file structure for testing should look something like this:
-
-Android:
-```shell-session
-foo@bar $ tree .  
-.
-├── Marathonfile
-├── dist
-│   ├── app-debug.apk
-│   ├── app-debug-androidTest.apk
-```
-
-iOS:
-```shell-session
-foo@bar $ tree .  
-.
-├── Marathondevices
-├── Marathonfile
-├── build
-│   ├── my.app
-│   ├── my.xctest
-
-```
-
-### Execution
-
-Start the test runner in the root of your project
-```bash
-$ marathon 
-XXX [main] INFO com.malinskiy.marathon.cli.ApplicationView - Starting marathon
-XXX [main] INFO com.malinskiy.marathon.cli.config.ConfigFactory - Checking Marathonfile config
-...
-```
-
-### Requirements
-Marathon requires Java Runtime Environment 8 or higher.
-
-## Move even faster with Marathon Cloud
-<h1 align="center">
-  <img src="docs/static/img/marathon-cloud-banner.svg" alt="Marathon Logo" />
-</h1>
-Marathon Cloud is a scalable testing-as-a-service product designed and developed by us, the creators of Marathon. It's got all the cloud testing infrastructure you need to run any number of tests in less than 15 minutes, 
-whether you're a startup or a large enterprise.
-
-[Learn more][marathon-cloud]
 
 ## Contributing
 
@@ -136,18 +62,17 @@ See [contributing docs][contributing]
 
 ## License
 
-Marathon codebase is GPL 2.0 [LICENSE][LICENSE] with following optional components under specific licenses:
-* [libxctest-parser][libxctest-parser-license]
+Marathon codebase is GPL 2.0 [LICENSE][LICENSE]
 
 <!--
 Repo References
 -->
-[repo]:https://github.com/MarathonLabs/marathon
+[repo]:https://github.com/MarathonLabs/marathon-gradle-plugin
 
 <!--
 Link References
 -->
-[img-version-badge]:https://img.shields.io/github/release/MarathonLabs/marathon.svg?style=for-the-badge
+[img-version-badge]:https://img.shields.io/github/release/MarathonLabs/marathon-gradle-plugin.svg?style=for-the-badge
 [img-slack-badge]:https://img.shields.io/badge/Chat-Slack-49c39e?style=for-the-badge
 [img-telegram-badge]:https://img.shields.io/badge/Chat-Telegram-0088CC?style=for-the-badge
 
@@ -157,10 +82,9 @@ Link References
 
 [release]:https://github.com/MarathonLabs/marathon/releases/latest "Latest Release (external link) ➶"
 [docs]:https://docs.marathonlabs.io
-[docs-workers]:https://docs.marathonlabs.io/ios/workers
 [contributing]:https://docs.marathonlabs.io/intro/contribute
 [prs]:http://makeapullrequest.com "Make a Pull Request (external link) ➶"
-[LICENSE]:https://github.com/MarathonLabs/marathon/blob/-/LICENSE
-[libxctest-parser-license]: https://github.com/MarathonLabs/marathon/blob/-/vendor/vendor-ios/src/main/resources/EULA.md
+[LICENSE]:https://github.com/MarathonLabs/marathon-gradle-plugin/blob/-/LICENSE
 
-[marathon-cloud]:https://marathonlabs.io
+[marathon]:https://github.com/MarathonLabs/marathon/
+[plugins-gradle]: https://plugins.gradle.org
