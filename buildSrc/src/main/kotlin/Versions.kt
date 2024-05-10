@@ -13,7 +13,6 @@ object Versions {
 
     val junit5 = "5.10.1"
 
-    val gson = "2.10.1"
     val apacheCommonsCodec = "1.15"
     val jupiterEngine = junit5
     val dokka = "1.9.10"
@@ -30,7 +29,6 @@ object BuildPlugins {
 object Libraries {
     val configuration = "com.malinskiy.marathon:configuration:${Versions.marathon}"
     val kotlinLogging = "io.github.microutils:kotlin-logging:${Versions.kotlinLogging}"
-    val gson = "com.google.code.gson:gson:${Versions.gson}"
     val apacheCommonsCodec = "commons-codec:commons-codec:${Versions.apacheCommonsCodec}"
 }
 
