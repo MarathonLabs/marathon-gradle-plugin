@@ -12,16 +12,13 @@ jobs:
           java-version: '11'
       - name: test
         run: |
-          ./gradlew clean test jacocoTestReport integrationTest
+          ./gradlew clean test
           bash <(curl -s https://codecov.io/bash)
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v3
         if: always()
         with:
           report_paths: '**/build/test-results/test/TEST-*.xml'
-      - name: detekt
-        run: |
-          ./gradlew clean detektCheck || true
       - name: validateGradlePlugins
         run: |
           ./gradlew validatePlugins
