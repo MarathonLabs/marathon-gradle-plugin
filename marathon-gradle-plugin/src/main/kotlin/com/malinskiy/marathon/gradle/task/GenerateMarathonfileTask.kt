@@ -86,16 +86,18 @@ open class GenerateMarathonfileTask @Inject constructor(objects: ObjectFactory) 
                         val artifactLoader = it.artifactLoader.get()
                         val artifacts: BuiltArtifacts =
                             artifactLoader.load(it.apkFolder.get()) ?: throw RuntimeException("No application artifact found")
-                        when {
-                            artifacts.elements.size > 1 -> throw UnsupportedOperationException(
+                    val application = when {
+                        artifacts.elements.size > 1 -> artifacts.elements.firstOrNull { artifact ->
+                            artifact.outputFile.contains("universal")
+                        }?.let { artifact -> File(artifact.outputFile) }
+                            ?: throw UnsupportedOperationException(
                                 "The Marathon plugin does not support abi splits for app APKs, " +
                                     "but supports testing via a universal APK. "
                                     + "Add the flag \"universalApk true\" in the android.splits.abi configuration."
                             )
-
-                            artifacts.elements.isEmpty() -> throw UnsupportedOperationException("No artifacts for variant $flavorName")
-                        }
-                    val application = File(artifacts.elements.first().outputFile)
+                        artifacts.elements.isEmpty() -> throw UnsupportedOperationException("No artifacts for variant $flavorName")
+                        else -> File(artifacts.elements.first().outputFile)
+                    }
                     val testArtifactsLoader = it.testArtifactLoader.get()
                     val testArtifacts =
                         testArtifactsLoader.load(it.testApkFolder.get()) ?: throw RuntimeException("No test artifacts for variant $flavorName")
