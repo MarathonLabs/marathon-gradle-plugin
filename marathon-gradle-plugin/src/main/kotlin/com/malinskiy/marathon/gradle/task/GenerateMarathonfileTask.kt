@@ -83,8 +83,8 @@ open class GenerateMarathonfileTask @Inject constructor(objects: ObjectFactory) 
         return bundles.map {
             when(it) {
                 is GradleAndroidTestBundle.ApplicationWithTest -> {
-                        val artifactLoader = it.artifactLoader.get()
-                        val artifacts: BuiltArtifacts =
+                    val artifactLoader = it.artifactLoader.get()
+                    val artifacts: BuiltArtifacts =
                             artifactLoader.load(it.apkFolder.get()) ?: throw RuntimeException("No application artifact found")
                     val application = when {
                         artifacts.elements.size > 1 -> artifacts.elements.firstOrNull { artifact ->
