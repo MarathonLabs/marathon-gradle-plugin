@@ -2,11 +2,6 @@ package com.malinskiy.marathon.gradle.task
 
 import com.android.build.api.variant.BuiltArtifacts
 import com.android.build.api.variant.VariantOutputConfiguration
-import com.android.build.api.variant.impl.BuiltArtifactImpl
-import com.android.build.api.variant.impl.BuiltArtifactsImpl
-import com.android.build.api.variant.impl.VariantOutputConfigurationImpl
-import com.android.build.gradle.api.ApkVariantOutput
-import com.android.builder.model.AndroidArtifactOutput
 import com.malinskiy.marathon.config.serialization.ConfigurationFactory
 import com.malinskiy.marathon.config.vendor.android.AndroidTestBundleConfiguration
 import com.malinskiy.marathon.gradle.GradleAndroidTestBundle
