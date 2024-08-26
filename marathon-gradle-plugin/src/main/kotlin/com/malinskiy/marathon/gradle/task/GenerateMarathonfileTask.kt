@@ -1,6 +1,12 @@
 package com.malinskiy.marathon.gradle.task
 
 import com.android.build.api.variant.BuiltArtifacts
+import com.android.build.api.variant.VariantOutputConfiguration
+import com.android.build.api.variant.impl.BuiltArtifactImpl
+import com.android.build.api.variant.impl.BuiltArtifactsImpl
+import com.android.build.api.variant.impl.VariantOutputConfigurationImpl
+import com.android.build.gradle.api.ApkVariantOutput
+import com.android.builder.model.AndroidArtifactOutput
 import com.malinskiy.marathon.config.serialization.ConfigurationFactory
 import com.malinskiy.marathon.config.vendor.android.AndroidTestBundleConfiguration
 import com.malinskiy.marathon.gradle.GradleAndroidTestBundle
@@ -86,18 +92,16 @@ open class GenerateMarathonfileTask @Inject constructor(objects: ObjectFactory) 
                     val artifactLoader = it.artifactLoader.get()
                     val artifacts: BuiltArtifacts =
                             artifactLoader.load(it.apkFolder.get()) ?: throw RuntimeException("No application artifact found")
-                    val application = when {
-                        artifacts.elements.size > 1 -> artifacts.elements.firstOrNull { artifact ->
-                            artifact.outputFile.contains("universal")
-                        }?.let { artifact -> File(artifact.outputFile) }
-                            ?: throw UnsupportedOperationException(
-                                "The Marathon plugin does not support abi splits for app APKs, " +
-                                    "but supports testing via a universal APK. "
-                                    + "Add the flag \"universalApk true\" in the android.splits.abi configuration."
-                            )
-                        artifacts.elements.isEmpty() -> throw UnsupportedOperationException("No artifacts for variant $flavorName")
-                        else -> File(artifacts.elements.first().outputFile)
-                    }
+                    val validArtifact = artifacts.elements.find { builtArtifact ->
+                        builtArtifact.outputType == VariantOutputConfiguration.OutputType.SINGLE // when there are no splits
+                    } ?: artifacts.elements.find { builtArtifact ->
+                        builtArtifact.outputType == VariantOutputConfiguration.OutputType.UNIVERSAL // when universal apk is present
+                    } ?: throw UnsupportedOperationException(
+                        "The Marathon plugin does not support abi splits for app APKs, " +
+                            "but supports testing via a universal APK. "
+                            + "Add the flag \"universalApk true\" in the android.splits.abi configuration."
+                    )
+                    val application = File(validArtifact.outputFile)
                     val testArtifactsLoader = it.testArtifactLoader.get()
                     val testArtifacts =
                         testArtifactsLoader.load(it.testApkFolder.get()) ?: throw RuntimeException("No test artifacts for variant $flavorName")
