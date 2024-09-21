@@ -13,7 +13,7 @@ import java.io.File
 
 
 class CachingTest {
-    val GRADLE_VERSION = "7.6.1"
+    val GRADLE_VERSION = "7.6.4"
 
     @Test
     fun testUnpackingIsCached() {

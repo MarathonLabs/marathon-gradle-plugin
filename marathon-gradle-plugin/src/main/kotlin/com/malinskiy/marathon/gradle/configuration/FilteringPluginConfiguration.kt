@@ -89,7 +89,7 @@ fun Wrapper.toList(): List<TestFilterConfiguration> {
         mutableList.addAll(it)
     }
     if (allureTestFilter) {
-        mutableList.add(TestFilterConfiguration.AllureFilterConfiguration)
+        mutableList.add(TestFilterConfiguration.AllureFilterConfiguration())
     }
     return mutableList
 }

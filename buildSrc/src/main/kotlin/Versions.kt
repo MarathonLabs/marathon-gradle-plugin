@@ -1,5 +1,5 @@
 object Versions {
-    val marathon = System.getenv("MARATHON_VERSION") ?: "0.10.1"
+    val marathon = System.getenv("MARATHON_VERSION") ?: "0.10.2"
 
     val kotlin = "1.9.10"
 
@@ -8,7 +8,7 @@ object Versions {
     val junitGradle = "1.2.0"
     val androidGradleVersion = "8.2.2"
     val gradlePluginPublish = "1.2.1"
-    val gradlePluginShadow = "8.1.1"
+    val gradlePluginShadow = "8.3.2"
     val gradlePluginDownload = "5.6.0"
 
     val junit5 = "5.10.1"
