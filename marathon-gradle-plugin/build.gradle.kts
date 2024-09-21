@@ -4,7 +4,7 @@ plugins {
     `kotlin-dsl`
     id("org.jetbrains.dokka")
     id("com.gradle.plugin-publish") version Versions.gradlePluginPublish
-    id("com.github.johnrengelman.shadow") version Versions.gradlePluginShadow
+    id("com.gradleup.shadow") version Versions.gradlePluginShadow
     id("de.undercouch.download") version Versions.gradlePluginDownload
 }
 
