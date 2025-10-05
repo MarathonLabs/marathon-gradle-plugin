@@ -1,5 +1,5 @@
 object Versions {
-    val marathon = System.getenv("MARATHON_VERSION") ?: "0.10.3"
+    val marathon = System.getenv("MARATHON_VERSION") ?: "0.10.4"
 
     val kotlin = "1.9.10"
 
