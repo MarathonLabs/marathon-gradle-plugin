@@ -16,24 +16,6 @@ class CachingTest {
     val GRADLE_VERSION = "7.6.4"
 
     @Test
-    fun testUnpackingIsCached() {
-        val runner = GradleRunner.create()
-            .withGradleVersion(GRADLE_VERSION)
-            .withProjectDir(testProjectDir)
-            .withArguments(":app:marathonWrapper", "--build-cache", "--stacktrace")
-        var result = runner.build()
-
-        assertThat(result.output).contains("BUILD SUCCESSFUL")
-
-        result = runner
-            .withArguments(":app:marathonWrapper", "--build-cache", "--stacktrace", "--info")
-            .build()
-
-        assertThat(result.task(":app:marathonWrapperExtract")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
-        assertThat(result.task(":app:marathonWrapper")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
-    }
-
-    @Test
     fun testMarathonfileGenerationIsCached() {
         val runner = GradleRunner.create()
             .withGradleVersion(GRADLE_VERSION)

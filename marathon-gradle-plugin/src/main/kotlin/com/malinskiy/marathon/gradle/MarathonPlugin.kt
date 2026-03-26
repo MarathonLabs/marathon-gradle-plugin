@@ -10,21 +10,17 @@ import com.malinskiy.marathon.config.Configuration
 import com.malinskiy.marathon.config.vendor.VendorConfiguration
 import com.malinskiy.marathon.gradle.configuration.toStrategy
 import com.malinskiy.marathon.gradle.service.JsonService
+import com.malinskiy.marathon.gradle.service.MarathonCliService
 import com.malinskiy.marathon.gradle.task.GenerateMarathonfileTask
 import com.malinskiy.marathon.gradle.task.MarathonRunTask
-import com.malinskiy.marathon.gradle.task.MarathonUnpackTask
 import org.apache.commons.codec.digest.DigestUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
-import org.gradle.api.file.RelativePath
 import org.gradle.api.logging.Logger
-import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.Delete
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.closureOf
 import org.gradle.kotlin.dsl.findByType
@@ -37,13 +33,12 @@ class MarathonPlugin : Plugin<Project> {
         logger.info("Applying marathon plugin")
         val marathonExtension = project.extensions.create("marathon", MarathonExtension::class.java)
 
-        // Register shared service on current project's gradle instance (not rootProject)
+        // Register shared services on current project's gradle instance (not rootProject)
         val jsonServiceProvider = project.gradle.sharedServices.registerIfAbsent("marathonJson", JsonService::class.java) {}
-
-        // Register wrapper task on current project instead of rootProject
-        val wrapper: TaskProvider<MarathonUnpackTask> = project.tasks.findByName(MarathonUnpackTask.NAME)?.let {
-            project.tasks.named(MarathonUnpackTask.NAME, MarathonUnpackTask::class.java)
-        } ?: applyOnProject(project)
+        val cliServiceProvider = project.gradle.sharedServices.registerIfAbsent("marathonCli", MarathonCliService::class.java) {
+            parameters.cliMd5.set(DigestUtils.md5Hex(MarathonPlugin::class.java.getResourceAsStream(CLI_PATH)))
+            parameters.marathonDir.set(File(project.rootDir, "build/marathon"))
+        }
 
         val marathonTask: Task = project.task(TASK_PREFIX, closureOf<Task> {
             group = JavaBasePlugin.VERIFICATION_GROUP
@@ -80,7 +75,7 @@ class MarathonPlugin : Plugin<Project> {
                         )
 
                         val (generateMarathonfileTaskProvider, testTaskForVariantProvider) = createTasks(
-                            logger, androidTest.name, bundle, project, conf, sdkDirectory, wrapper, jsonServiceProvider
+                            logger, androidTest.name, bundle, project, conf, sdkDirectory, cliServiceProvider, jsonServiceProvider
                         )
                         marathonTask.dependsOn(testTaskForVariantProvider)
                     }
@@ -104,7 +99,7 @@ class MarathonPlugin : Plugin<Project> {
                         )
 
                         val (generateMarathonfileTask, testTaskForVariant) = createTasks(
-                            logger, androidTest.name, bundle, project, conf, sdkDirectory, wrapper, jsonServiceProvider
+                            logger, androidTest.name, bundle, project, conf, sdkDirectory, cliServiceProvider, jsonServiceProvider
                         )
                         marathonTask.dependsOn(testTaskForVariant)
                     }
@@ -126,7 +121,7 @@ class MarathonPlugin : Plugin<Project> {
                     )
 
                     val (_, testTaskForVariant) = createTasks(
-                        logger, androidTest.name, bundle, project, conf, sdkDirectory, wrapper, jsonServiceProvider
+                        logger, androidTest.name, bundle, project, conf, sdkDirectory, cliServiceProvider, jsonServiceProvider
                     )
                     marathonTask.dependsOn(testTaskForVariant)
 
@@ -137,44 +132,6 @@ class MarathonPlugin : Plugin<Project> {
         }
     }
 
-    private fun applyOnProject(project: Project): TaskProvider<MarathonUnpackTask> {
-        val distZip = project.objects.fileProperty()
-        distZip.set(project.layout.buildDirectory.dir("marathon").map { it.file("marathon-cli.zip") })
-
-        val distZipTaskProvider = project.tasks.register("marathonWrapperExtract", Copy::class.java) {
-            inputs.property("md5", DigestUtils.md5Hex(MarathonPlugin::class.java.getResourceAsStream(CLI_PATH)))
-            outputs.file(distZip).withPropertyName("distZip")
-            from(project.zipTree(File(MarathonPlugin::class.java.protectionDomain.codeSource.location.toURI()).path))
-            include("marathon-cli.zip")
-            into(project.layout.buildDirectory.dir("marathon"))
-        }
-
-        val wrapperTask = project.tasks.register(MarathonUnpackTask.NAME, MarathonUnpackTask::class.java) {
-            inputs.file(distZipTaskProvider.map { File(it.destinationDir, "marathon-cli.zip") })
-                .withPropertyName("distZip")
-            dist.set(project.layout.buildDirectory.dir("marathon").map { it.dir("cli") })
-
-            from(project.zipTree(distZip)) {
-                eachFile {
-                    relativePath = RelativePath(true, *relativePath.segments.drop(1).toTypedArray())
-                }
-                includeEmptyDirs = false
-            }
-            into(dist)
-        }
-
-        val cleanTaskProvider = project.tasks.register("cleanMarathonWrapper", Delete::class.java) {
-            group = Const.GROUP
-            setDelete(project.layout.buildDirectory.dir("marathon"))
-        }
-        project.plugins.withType(BasePlugin::class.java) {
-            project.tasks.named(BasePlugin.CLEAN_TASK_NAME).configure {
-                dependsOn(cleanTaskProvider)
-            }
-        }
-        return wrapperTask
-    }
-
     companion object {
         private fun createTasks(
             logger: Logger,
@@ -183,7 +140,7 @@ class MarathonPlugin : Plugin<Project> {
             project: Project,
             config: MarathonExtension,
             sdkDirectory: Provider<Directory>,
-            wrapper: TaskProvider<MarathonUnpackTask>,
+            cliServiceProvider: Provider<MarathonCliService>,
             jsonServiceProvider: Provider<JsonService>,
         ): Pair<TaskProvider<GenerateMarathonfileTask>, TaskProvider<MarathonRunTask>> {
             val baseOutputDir = config.baseOutputDir?.let { File(it) } ?: project.layout.buildDirectory.dir("reports/marathon").get().asFile
@@ -261,7 +218,8 @@ class MarathonPlugin : Plugin<Project> {
                 description = "Runs instrumentation tests on all the connected devices for '${variantName}' " +
                     "variation and generates a report with screenshots"
                 outputs.upToDateWhen { false }
-                dist.set(wrapper.flatMap { it.dist })
+                cliService.set(cliServiceProvider)
+                usesService(cliServiceProvider)
                 marathonfile.set(generateMarathonfileTask.flatMap { it.marathonfile })
             }
 

@@ -1,13 +1,13 @@
 package com.malinskiy.marathon.gradle.task
 
+import com.malinskiy.marathon.gradle.service.MarathonCliService
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.AbstractExecTask
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.VerificationTask
 import org.gradle.internal.os.OperatingSystem
@@ -24,8 +24,8 @@ open class MarathonRunTask @Inject constructor(objects: ObjectFactory) : Abstrac
     @InputFile
     val marathonfile: RegularFileProperty = objects.fileProperty()
 
-    @InputDirectory
-    val dist: DirectoryProperty = objects.directoryProperty()
+    @Internal
+    val cliService: Property<MarathonCliService> = objects.property()
 
     @OutputDirectory
     val fakeLockingOutput: DirectoryProperty = objects.directoryProperty().convention(
@@ -35,7 +35,8 @@ open class MarathonRunTask @Inject constructor(objects: ObjectFactory) : Abstrac
     private var ignoreFailure: Boolean = false
 
     override fun exec() {
-        setExecutable(getPlatformScript(dist.get().asFile))
+        val cliDir = cliService.get().getCliDirectory()
+        setExecutable(getPlatformScript(cliDir))
         setArgs(listOf("-m", marathonfile.get().asFile.canonicalPath))
 
         super.exec()
