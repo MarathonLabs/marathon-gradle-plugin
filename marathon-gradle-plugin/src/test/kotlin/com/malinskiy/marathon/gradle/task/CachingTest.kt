@@ -20,17 +20,17 @@ class CachingTest {
         val runner = GradleRunner.create()
             .withGradleVersion(GRADLE_VERSION)
             .withProjectDir(testProjectDir)
-            .withArguments(":marathonWrapper", "--build-cache", "--stacktrace")
+            .withArguments(":app:marathonWrapper", "--build-cache", "--stacktrace")
         var result = runner.build()
 
         assertThat(result.output).contains("BUILD SUCCESSFUL")
 
         result = runner
-            .withArguments(":marathonWrapper", "--build-cache", "--stacktrace", "--info")
+            .withArguments(":app:marathonWrapper", "--build-cache", "--stacktrace", "--info")
             .build()
 
-        assertThat(result.task(":marathonWrapperExtract")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
-        assertThat(result.task(":marathonWrapper")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
+        assertThat(result.task(":app:marathonWrapperExtract")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
+        assertThat(result.task(":app:marathonWrapper")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
     }
 
     @Test
