@@ -40,6 +40,15 @@ class MarathonPlugin : Plugin<Project> {
             parameters.marathonDir.set(File(project.rootDir, "build/marathon"))
         }
 
+        project.tasks.register("marathonExtractCli") {
+            group = Const.GROUP
+            description = "Extracts the marathon CLI binary"
+            usesService(cliServiceProvider)
+            doLast {
+                cliServiceProvider.get().getCliDirectory()
+            }
+        }
+
         val marathonTask: Task = project.task(TASK_PREFIX, closureOf<Task> {
             group = JavaBasePlugin.VERIFICATION_GROUP
             description = "Runs all the instrumentation test variations on all the connected devices"

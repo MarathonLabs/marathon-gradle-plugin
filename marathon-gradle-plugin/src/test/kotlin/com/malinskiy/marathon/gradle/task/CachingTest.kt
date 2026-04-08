@@ -3,6 +3,7 @@ package com.malinskiy.marathon.gradle.task
 import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
+import assertk.assertions.isTrue
 import com.malinskiy.marathon.configuration.BuildConfig
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
@@ -14,6 +15,47 @@ import java.io.File
 
 class CachingTest {
     val GRADLE_VERSION = "7.6.4"
+
+    @Test
+    fun testCliExtractionIsCached() {
+        val runner = GradleRunner.create()
+            .withGradleVersion(GRADLE_VERSION)
+            .withProjectDir(testProjectDir)
+            .withArguments(":app:marathonExtractCli", "--stacktrace")
+        var result = runner.build()
+
+        assertThat(result.output).contains("BUILD SUCCESSFUL")
+
+        val cliDir = File(testProjectDir, "build/marathon/cli")
+        assertThat(cliDir.exists()).isTrue()
+        assertThat(File(cliDir, "bin/marathon").exists() || File(cliDir, "bin/marathon.bat").exists()).isTrue()
+
+        val md5File = File(testProjectDir, "build/marathon/.md5")
+        assertThat(md5File.exists()).isTrue()
+        val md5Before = md5File.lastModified()
+
+        // Run again - service should skip extraction (MD5 matches)
+        result = runner.build()
+        assertThat(result.output).contains("BUILD SUCCESSFUL")
+        assertThat(md5File.lastModified()).isEqualTo(md5Before)
+    }
+
+    @Test
+    fun testCliExtractionIsSharedAcrossModules() {
+        val result = GradleRunner.create()
+            .withGradleVersion(GRADLE_VERSION)
+            .withProjectDir(testProjectDir)
+            .withArguments(":app:marathonExtractCli", ":lib:marathonExtractCli", "--info", "--stacktrace")
+            .build()
+
+        assertThat(result.output).contains("BUILD SUCCESSFUL")
+
+        // "Extracting marathon CLI" should appear exactly once - the second module should hit the cache
+        val extractCount = result.output.lines().count { it.contains("Extracting marathon CLI to") }
+        val cacheHitCount = result.output.lines().count { it.contains("Marathon CLI already extracted at") }
+        assertThat(extractCount).isEqualTo(1)
+        assertThat(cacheHitCount).isEqualTo(1)
+    }
 
     @Test
     fun testMarathonfileGenerationIsCached() {
