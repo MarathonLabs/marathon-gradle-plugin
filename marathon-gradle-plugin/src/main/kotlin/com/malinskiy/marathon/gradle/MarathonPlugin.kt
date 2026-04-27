@@ -212,6 +212,7 @@ class MarathonPlugin : Plugin<Project> {
                     deviceInitializationTimeoutMillis = deviceInitializationTimeoutMillis
                 }
                 config.outputConfiguration?.toStrategy()?.let { outputConfiguration = it }
+                config.allowEmptyTestSuites?.let { allowEmptyTestSuites = it }
             }
             val vendorConfigurationBuilder = VendorConfiguration.AndroidConfigurationBuilder().apply {
                 config.autoGrantPermission?.let { autoGrantPermission = it }
