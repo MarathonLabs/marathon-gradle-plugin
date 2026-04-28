@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application' version '7.4.1' apply false
     id 'com.android.library' version '7.4.1' apply false
+    id 'com.android.test' version '7.4.1' apply false
     id 'com.malinskiy.marathon' version '${MARATHON_VERSION}' apply false
 }
 
