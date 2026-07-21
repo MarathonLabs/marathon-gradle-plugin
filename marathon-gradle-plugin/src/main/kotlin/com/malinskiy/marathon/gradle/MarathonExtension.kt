@@ -388,6 +388,11 @@ open class MarathonExtension {
     var disableWindowAnimation: Boolean? = null
 
     /**
+     * By default Marathon will fail, if there no tests discovered to run. Use this option to override this behaviour
+     */
+    var allowEmptyTestSuites: Boolean? = null
+
+    /**
      * Configuration of analytics backend to be used for storing and retrieving test metrics. This plays a major part in optimising
      * performance and mitigating flakiness.
      */
