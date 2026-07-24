@@ -17,7 +17,8 @@
 .idea/kotlinc.xml
 .idea/misc.xml
 .idea/modules.xml
-
+.idea/AndroidProjectSystem.xml
+.idea/vcs.xml
 
 # Generated files
 .idea/**/contentModel.xml
