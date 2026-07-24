@@ -1,4 +1,4 @@
-import de.undercouch.gradle.tasks.download.Download;
+import de.undercouch.gradle.tasks.download.Download
 
 plugins {
     `kotlin-dsl`
