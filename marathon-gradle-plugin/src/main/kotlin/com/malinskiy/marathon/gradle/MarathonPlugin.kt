@@ -165,7 +165,7 @@ class MarathonPlugin : Plugin<Project> {
                 config.retryStrategy?.toStrategy()?.let { retryStrategy = it }
                 config.filteringConfiguration?.toFilteringConfiguration()?.let { filteringConfiguration = it }
                 config.ignoreFailures?.let { ignoreFailures = it }
-                config.isCodeCoverageEnabled?.let { isCodeCoverageEnabled = it }
+                config.codeCoverageEnabled?.let { isCodeCoverageEnabled = it }
                 config.executionStrategy?.let { executionStrategy = it }
                 config.uncompletedTestRetryQuota?.let { uncompletedTestRetryQuota = it }
                 config.includeSerialRegexes?.map { it.toRegex() }?.let { includeSerialRegexes = it }
