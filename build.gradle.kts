@@ -22,10 +22,8 @@ plugins {
 
 configure<DetektExtension> {
     debug = true
-    input = files(
-        rootProject.projectDir.absolutePath
-    )
-    config = files("${rootProject.projectDir}/default-detekt-config.yml")
+    source.setFrom(files(rootProject.projectDir.absolutePath))
+    config.setFrom(files("${rootProject.projectDir}/default-detekt-config.yml"))
     baseline = file("${rootProject.projectDir}/reports/baseline.xml")
 }
 

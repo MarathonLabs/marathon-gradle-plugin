@@ -6,12 +6,13 @@ import org.gradle.kotlin.dsl.withType
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+// this function has been copied into buildSrc/build.gradle.kts
 fun Project.setupKotlinCompiler(jvmTarget: String = "11") {
-    tasks.withType<KotlinCompile> {
+    tasks.withType<KotlinCompile>().configureEach {
         kotlinOptions.jvmTarget = jvmTarget
         kotlinOptions.apiVersion = "1.5"
     }
-    tasks.withType<JavaCompile> {
+    tasks.withType<JavaCompile>().configureEach {
         sourceCompatibility = jvmTarget
         targetCompatibility = jvmTarget
     }
