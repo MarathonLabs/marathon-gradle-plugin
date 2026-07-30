@@ -164,22 +164,22 @@ open class MarathonExtension {
     var ignoreFailures: Boolean? = null
 
     /**
-     * @see [codeCoverageEnabled]
+     * @see [enableCodeCoverage]
      * @see <a href="https://docs.gradle.org/9.6.1/userguide/upgrading_version_8.html#groovy_boolean_properties">Declaring boolean properties with is-prefix and Boolean types</a>
      */
-    @Deprecated(message = "This property will be removed for Gradle 10 support. Use 'codeCoverageEnabled' instead.", replaceWith = ReplaceWith("codeCoverageEnabled"))
+    @Deprecated(message = "This property will be removed for Gradle 10 support. Use 'enableCodeCoverage' instead.", replaceWith = ReplaceWith("enableCodeCoverage"))
     var isCodeCoverageEnabled: Boolean?
         set(value) {
-            codeCoverageEnabled = value
+            enableCodeCoverage = value
         }
-        get() = codeCoverageEnabled
+        get() = enableCodeCoverage
 
     /**
      * Depending on the vendor implementation code coverage may not be supported. By default, code coverage is disabled. If this option is enabled,
      * code coverage will be collected and marathon assumes that code coverage generation will be setup by user (e.g. proper build flags, jacoco
      * jar added to classpath, etc).
      */
-    var codeCoverageEnabled: Boolean? = null
+    var enableCodeCoverage: Boolean? = null
 
     /**
      * When executing tests with retries there are multiple trade-offs to be made. Two execution strategies are supported: any success or all success.
