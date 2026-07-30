@@ -174,11 +174,9 @@ class MarathonPlugin : Plugin<Project> {
                 config.testOutputTimeoutMillis?.let { testOutputTimeoutMillis = it }
                 config.debug?.let { debug = it }
                 config.screenRecordingPolicy?.let { screenRecordingPolicy = it }
-                config.analyticsTracking?.let { analyticsTracking = it }
-                config.bugsnagReporting?.let { bugsnagReporting = it }
-                config.deviceInitializationTimeoutMillis?.let {
-                    deviceInitializationTimeoutMillis = deviceInitializationTimeoutMillis
-                }
+                config.analyticsTracking.let { analyticsTracking = it }
+                config.bugsnagReporting.let { bugsnagReporting = it }
+                config.deviceInitializationTimeoutMillis?.let { deviceInitializationTimeoutMillis = it }
                 config.outputConfiguration?.toStrategy()?.let { outputConfiguration = it }
             }
             val vendorConfigurationBuilder = VendorConfiguration.AndroidConfigurationBuilder().apply {
@@ -206,7 +204,7 @@ class MarathonPlugin : Plugin<Project> {
 
             val generateMarathonfileTask =
                 project.tasks.register(
-                    "$TASK_PREFIX${variantName.capitalize()}GenerateMarathonfile",
+                    "$TASK_PREFIX${variantName.replaceFirstChar(Char::uppercase)}GenerateMarathonfile",
                     GenerateMarathonfileTask::class.java
                 ) {
                     group = Const.GROUP
@@ -222,7 +220,7 @@ class MarathonPlugin : Plugin<Project> {
                                          .map { it.file("Marathonfile") })
                 }
 
-            val marathonTask = project.tasks.register("$TASK_PREFIX${variantName.capitalize()}", MarathonRunTask::class.java) {
+            val marathonTask = project.tasks.register("$TASK_PREFIX${variantName.replaceFirstChar(Char::uppercase)}", MarathonRunTask::class.java) {
                 group = JavaBasePlugin.VERIFICATION_GROUP
                 description = "Runs instrumentation tests on all the connected devices for '${variantName}' " +
                     "variation and generates a report with screenshots"
